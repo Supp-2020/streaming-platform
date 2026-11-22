@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import "video.js/dist/video-js.css";
+@import "videojs-contrib-quality-menu/dist/videojs-contrib-quality-menu.css";
+
+@theme inline {
+  --color-bg: #131211;
+  --color-surface: #1d1b19;
+  --color-line: #2a2724;
+  --color-fg: #f3efe8;
+  --color-muted: #a8a196;
+  --color-accent: #f0a04b;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-grotesk), sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ---- Video.js theme: Kinora ---- */
+.kinora-player.video-js {
+  --vjs-accent: #f0a04b;
+  width: 100%;
+  height: 100%;
+  background: #0b0a09;
+  font-family: var(--font-sans);
+}
+.kinora-player .vjs-control-bar {
+  background: linear-gradient(transparent, rgba(11, 10, 9, 0.9));
+  height: 4.5em;
+  padding-top: 1.2em;
+}
+.kinora-player .vjs-play-progress,
+.kinora-player .vjs-volume-level {
+  background: var(--vjs-accent);
+}
+.kinora-player .vjs-slider {
+  background: rgba(243, 239, 232, 0.28);
+}
+.kinora-player .vjs-load-progress div {
+  background: rgba(243, 239, 232, 0.45);
+}
+.kinora-player .vjs-big-play-button {
+  background: var(--vjs-accent);
+  color: #1a1208;
+  border: 0;
+  border-radius: 50%;
+  width: 2.4em;
+  height: 2.4em;
+  line-height: 2.4em;
+  margin-left: -1.2em;
+  margin-top: -1.2em;
+}
+.kinora-player:hover .vjs-big-play-button,
+.kinora-player .vjs-big-play-button:focus {
+  background: #f6b66f;
+}
+.kinora-player .vjs-menu-button-popup .vjs-menu .vjs-menu-content {
+  background: #1d1b19;
+  border: 1px solid #3a3631;
+  border-radius: 8px;
+}
+.kinora-player .vjs-menu li.vjs-selected {
+  background: var(--vjs-accent);
+  color: #1a1208;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
