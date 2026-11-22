@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Static export for GitHub Pages. basePath must match your GitHub repo name.
+  output: "export",
+  basePath: process.env.NODE_ENV === "production" ? "/streaming-platform" : undefined,
+  images: { unoptimized: true },
+  trailingSlash: true,
   turbopack: {
     rules: {
       "*.css": {
