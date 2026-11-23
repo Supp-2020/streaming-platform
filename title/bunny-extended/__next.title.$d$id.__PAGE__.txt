@@ -1,0 +1,40 @@
+1:"$Sreact.fragment"
+2:"/streaming-platform/_next/static/chunks/3qfy96eoyh-ek.js"
+3:"/streaming-platform/_next/static/chunks/3u9s76es9zfdh.js"
+4:I[44636,["$2","$3"],"Providers"]
+5:I[39756,["$2","$3"],"default"]
+6:I[37457,["$2","$3"],"default"]
+f:"$Sreact.suspense"
+10:"/streaming-platform/_next/static/chunks/30g7-pch1yqgz.js"
+11:I[2971,["$2","$3","$10"],"default"]
+12:I[22016,["$2","$3","$10"],""]
+13:I[43073,["$2","$3","$10"],"default"]
+1a:"ViewportBoundary"
+1b:I[97367,["$2","$3"],"$1a"]
+1c:"MetadataBoundary"
+1d:I[97367,["$2","$3"],"$1c"]
+1e:I[27201,["$2","$3"],"IconMark"]
+:HL["/streaming-platform/_next/static/chunks/31wrd1mg93cxt.css","style"]
+8:X
+b:X
+b:C
+e:[["children",{"s":"__PAGE__","h":160,"d":{"r":["$","$1","c",{"children":[["$","$f",null,{"fallback":["$","div",null,{"className":"h-72 animate-pulse bg-surface"}],"children":[["$","$L11",null,{}],["$","div",null,{"className":"relative overflow-hidden h-72","style":{"background":"#4B4231"},"aria-hidden":"true","children":[["$","div",null,{"className":"absolute rounded-full","style":{"background":"#F0A04B","width":"70%","paddingBottom":"70%","right":"-15%","top":"-25%"}}],["$","div",null,{"className":"absolute bottom-0 left-[12%] h-[60%] w-[34%] rounded-t-full bg-bg"}]]}],["$","div",null,{"className":"mx-auto flex w-full max-w-[1344px] flex-wrap gap-12 px-6 pb-16 md:px-12","children":[["$","div",null,{"className":"-mt-16 relative flex min-w-0 flex-[2_1_560px] flex-col gap-6","children":[["$","h1",null,{"className":"font-display text-5xl font-extrabold tracking-tight","children":"Big Buck Bunny: Director's Cut"}],["$","div",null,{"className":"flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted","children":[["$","span",null,{"className":"rounded border border-muted/60 px-2 py-0.5 font-semibold text-fg","children":"U"}],["$","span",null,{"children":2008}],"·",["$","span",null,{"children":"Animation, Family"}],"·",["$","span",null,{"children":"HD"}]]}],["$","div",null,{"className":"flex gap-3","children":[["$","$L12",null,{"href":"/watch/bunny-extended-s1e1","className":"flex h-[52px] items-center gap-2 rounded-lg bg-accent px-7 font-semibold text-[#1a1208]","children":"▶ Play"}],["$","$L13",null,{"titleId":"bunny-extended","label":true}]]}],["$","p",null,{"className":"max-w-2xl text-[17px] leading-relaxed text-[#cfc9be]","children":"Demo title that plays the same film from a second host, handy for comparing stream sources."}],[["$","section","1",{"aria-label":"Season 1","children":[["$","h2",null,{"className":"mb-2 font-display text-xl font-bold","children":"Watch"}],["$","ul",null,{"className":"flex flex-col gap-1","children":[["$","li","bunny-extended-s1e1",{"children":["$","$L12",null,{"href":"/watch/bunny-extended-s1e1","className":"flex items-center gap-4 rounded-xl p-3 hover:bg-surface","children":[["$","span",null,{"className":"w-7 text-center font-display text-xl font-bold text-muted","children":1}],["$","div",null,{"className":"min-w-0 flex-1","children":[["$","div",null,{"className":"font-semibold","children":"Director's Cut"}],"$L14"]}],"$L15"]}]}]]}]]}]]]}],"$L16"]}]]}],["$L17"],"$L18"]}],"p":"$@19","v":null,"s":"$8"}}]]
+c:[["children",{"s":{"n":"id","t":"d","k":"bunny-extended","s":[]},"h":96,"d":{"r":["$","$1","c",{"children":[null,["$","$L5",null,{"parallelRouterKey":"children","template":["$","$L6",null,{}]}]]}],"p":"$@d","v":"$b","s":"$8"},"c":"$Qe"}]]
+9:[["children",{"s":"title","h":96,"d":{"r":["$","$1","c",{"children":[null,["$","$L5",null,{"parallelRouterKey":"children","template":["$","$L6",null,{}]}]]}],"p":"$@a","v":"$b","s":"$8"},"c":"$Qc"}]]
+0:{"t":{"t":{"s":"","h":80,"d":{"r":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/streaming-platform/_next/static/chunks/31wrd1mg93cxt.css","precedence":"next"}],["$","script","script-0",{"src":"/streaming-platform/_next/static/chunks/3qfy96eoyh-ek.js","async":true}],["$","script","script-1",{"src":"/streaming-platform/_next/static/chunks/3u9s76es9zfdh.js","async":true}]],["$","html",null,{"lang":"en","className":"LINzvG_variable pS4tSa_variable h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col","children":["$","$L4",null,{"children":["$","$L5",null,{"parallelRouterKey":"children","template":["$","$L6",null,{}],"notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]]}]}]}]}]]}],"p":"$@7","v":null,"s":"$8"},"c":"$Q9"},"h":{"r":["$","$1","h",{"children":[null,["$","$L1b",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","$L1d",null,{"children":[["$","div",null,{"hidden":true,"children":["$","$f",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"Kinora"}],["$","meta","1",{"name":"description","content":"Streaming platform demo built with Next.js and Video.js"}],["$","link","2",{"rel":"icon","href":"/streaming-platform/favicon.ico?favicon.117ezoe8m31dk.ico","sizes":"48x48","type":"image/x-icon"}],["$","$L1e","3",{}]]}]}],null]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"p":"$@1f","v":null,"s":"$8"}},"a":"$@20","u":"$@21","b":"fRUZoWCTE4e00bt-Z8Eyf"}
+22:I[97367,["$2","$3"],"OutletBoundary"]
+14:["$","div",null,{"className":"text-sm text-muted","children":"Same film, different CDN."}]
+15:["$","span",null,{"className":"text-sm text-muted","children":[10," min"]}]
+16:["$","aside",null,{"className":"flex-[1_1_280px] pt-8","children":["$","div",null,{"className":"flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 text-sm","children":[["$","h2",null,{"className":"font-display text-lg font-bold","children":"Details"}],["$","div",null,{"children":[["$","div",null,{"className":"text-muted","children":"Cast"}],"Blender Foundation"]}],["$","div",null,{"children":[["$","div",null,{"className":"text-muted","children":"Genres"}],"Animation, Family"]}]]}]}]
+17:["$","script","script-0",{"src":"/streaming-platform/_next/static/chunks/30g7-pch1yqgz.js","async":true}]
+18:["$","$L22",null,{"children":["$","$f",null,{"name":"Next.MetadataOutlet","children":"$@23"}]}]
+8:300
+23:null
+21:true
+8:C
+20:0
+d:"$undefined"
+a:"$undefined"
+7:"$undefined"
+1f:"$undefined"
+19:"$undefined"
