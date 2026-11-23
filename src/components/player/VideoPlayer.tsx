@@ -19,7 +19,25 @@ export type VideoPlayerProps = {
   onAutoplayNextChange: (v: boolean) => void;
   onProgress: (t: number, d: number) => void;
   onNext: () => void;
+  skipIntroEnabled: boolean;
+  quality: "auto" | "saver" | "high" | "max";
+  captions: {
+    size: "small" | "medium" | "large";
+    color: "white" | "yellow";
+    bg: "none" | "dim" | "solid";
+    defaultOn: boolean;
+    lang: string;
+  };
 };
+
+type QualityLevel = { height?: number; enabled: boolean };
+type QualityLevels = { length: number; [i: number]: QualityLevel; on: (e: string, f: () => void) => void; off: (e: string, f: () => void) => void };
+type WithPlugins = { qualityLevels?: () => QualityLevels; textTrackSettings?: { setValues: (v: object) => void; updateDisplay: () => void } };
+
+const MAX_HEIGHT = { auto: Infinity, max: Infinity, high: 1080, saver: 480 };
+const CAPTION_PERCENT = { small: "0.75", medium: "1.00", large: "1.50" };
+const CAPTION_COLOR = { white: "#FFF", yellow: "#FF0" };
+const CAPTION_BG_OPACITY = { none: "0", dim: "0.5", solid: "1" };
 
 const MAX_RETRIES = 3;
 const NEXT_COUNTDOWN = 8;
@@ -154,11 +172,64 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     }
   }, [props.src, props.poster, props.title, props.subtitle]);
 
+  // ---- apply saved settings: caption size and quality cap ----
+  const { captions, quality } = props;
+  useEffect(() => {
+    const p = playerRef.current as unknown as WithPlugins | null;
+    if (!p?.textTrackSettings) return;
+    try {
+      p.textTrackSettings.setValues({
+        fontPercent: CAPTION_PERCENT[captions.size],
+        color: CAPTION_COLOR[captions.color],
+        backgroundColor: "#000",
+        backgroundOpacity: CAPTION_BG_OPACITY[captions.bg],
+      });
+      p.textTrackSettings.updateDisplay();
+    } catch {
+      /* optional */
+    }
+  }, [captions.size, captions.color, captions.bg, playerEl]);
+
+  // Turn on a matching subtitle track by default when the stream offers one.
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player || !playerEl || !captions.defaultOn) return;
+    const list = player.textTracks();
+    const pick = () => {
+      let chosen = false;
+      for (let i = 0; i < list.length; i++) {
+        const t = (list as unknown as TextTrack[])[i];
+        if ((t.kind === "subtitles" || t.kind === "captions") && !chosen && t.language?.toLowerCase().startsWith(captions.lang)) {
+          t.mode = "showing";
+          chosen = true;
+        }
+      }
+    };
+    pick();
+    list.addEventListener("addtrack", pick);
+    return () => list.removeEventListener("addtrack", pick);
+  }, [captions.defaultOn, captions.lang, playerEl]);
+
+  useEffect(() => {
+    const ql = (playerRef.current as unknown as WithPlugins | null)?.qualityLevels?.();
+    if (!ql) return;
+    const cap = MAX_HEIGHT[quality];
+    const apply = () => {
+      const levels = Array.from({ length: ql.length }, (_, i) => ql[i]);
+      const allowed = levels.filter((l) => !l.height || l.height <= cap);
+      const useCap = allowed.length > 0; // never disable every level
+      levels.forEach((l) => (l.enabled = useCap ? allowed.includes(l) : true));
+    };
+    apply();
+    ql.on("addqualitylevel", apply);
+    return () => ql.off("addqualitylevel", apply);
+  }, [quality, playerEl]);
+
   // ---- overlays (rendered inside the player element so they survive fullscreen) ----
   const m = props.markers;
   const creditsAt = m?.creditsStart ?? (duration > 0 ? duration - 20 : Infinity);
   const nearEnd = props.hasNext && !dismissed && (ended || time >= creditsAt);
-  const showSkipIntro = m?.introStart !== undefined && m.introEnd !== undefined && time >= m.introStart && time < m.introEnd;
+  const showSkipIntro = props.skipIntroEnabled && m?.introStart !== undefined && m.introEnd !== undefined && time >= m.introStart && time < m.introEnd;
 
   const overlay = (
     <>

@@ -11,7 +11,14 @@ export default function WatchClient({ title, episode, next }: { title: Title; ep
   const hydrated = useHydrated();
   const saved = useStore((s) => s.progress[episode.id]);
   const autoplayNext = useStore((s) => s.autoplayNext);
-  const setAutoplayNext = useStore((s) => s.setAutoplayNext);
+  const skipIntro = useStore((s) => s.skipIntro);
+  const quality = useStore((s) => s.quality);
+  const captionSize = useStore((s) => s.captionSize);
+  const captionColor = useStore((s) => s.captionColor);
+  const captionBg = useStore((s) => s.captionBg);
+  const captionsDefault = useStore((s) => s.captionsDefault);
+  const subLang = useStore((s) => s.subLang);
+  const set = useStore((s) => s.set);
   const setProgress = useStore((s) => s.setProgress);
   const clearProgress = useStore((s) => s.clearProgress);
 
@@ -43,7 +50,10 @@ export default function WatchClient({ title, episode, next }: { title: Title; ep
         markers={episode.markers}
         hasNext={!!next}
         autoplayNext={autoplayNext}
-        onAutoplayNextChange={setAutoplayNext}
+        onAutoplayNextChange={(v) => set({ autoplayNext: v })}
+        skipIntroEnabled={skipIntro}
+        quality={quality}
+        captions={{ size: captionSize, color: captionColor, bg: captionBg, defaultOn: captionsDefault, lang: subLang }}
         onProgress={(t, d) => (d - t < 15 ? clearProgress(episode.id) : setProgress(episode.id, t, d))}
         onNext={() => next && router.push(`/watch/${next.id}`)}
       />
