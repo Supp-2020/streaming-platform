@@ -1,51 +1,51 @@
-# Kinora: streaming platform demo
+# Kinora
 
-Next.js (App Router) + TypeScript + Tailwind v4 + **Video.js 8** (HLS built in via VHS).
-UI follows the "Kinora" design canvas (dark theme, amber `#F0A04B` accent, Inter + Schibsted Grotesk).
+A Netflix-style streaming platform demo built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Video.js**.
 
-## Setup
+It plays real HLS video streams in a custom-themed player and includes the surrounding app: browsing, search, My List, profiles and settings. It is a front-end demo with no backend, so all data is mock data and everything you do is saved only in your browser.
 
-```powershell
+## Features
+
+- **Player (Video.js):** HLS adaptive streaming, quality menu, speed control, ±10s skip, picture-in-picture, keyboard shortcuts, resume where you left off, Skip Intro, next-episode countdown with autoplay, subtitles and Media Session (media keys)
+- **Browse:** home with featured title, Continue Watching, carousels, Series / Films / Documentaries pages, title details with episodes
+- **Search:** instant results with type filters and sorting
+- **My List:** add, remove, edit mode and undo
+- **Sign in and profiles:** a sign-in page (UI only, no authentication) and a "Who's watching?" profile picker
+- **Settings:** account, profiles, playback, subtitles, devices and parental controls, plus a profile dropdown in the header
+
+## Getting started
+
+Requires Node 20 or newer.
+
+```bash
 npm install
-npm run dev      # http://localhost:3000  (redirects to /browse)
-npm run build    # production build
+npm run dev
+```
+
+Open http://localhost:3000. The app starts at the sign-in page.
+
+Other commands:
+
+```bash
+npm run build   # static export to ./out
 npm run lint
 ```
 
-Requires Node 20+ (built with Node 22).
+## Project structure
 
-## Routes
-
-| Route | What |
+| Path | What it is |
 |---|---|
-| `/browse` | Hero, Continue Watching (progress bars), carousels, Top-10 rank. `?list=1` shows My List |
-| `/title/[id]` | Details, seasons/episodes, My List toggle |
-| `/watch/[id]` | Video.js player (`id` is an episode id, e.g. `test-pattern-s1e1`) |
+| `src/app/` | Pages (signin, profiles, browse, search, my-list, settings, title, watch) |
+| `src/components/player/` | Video.js player and watch page wiring |
+| `src/lib/catalog.ts` | Mock catalog and public test streams |
+| `src/lib/store.ts` | Saved state (Zustand, stored in the browser) |
 
-## Stack and where things live
+## Deployment
 
-- `src/components/player/VideoPlayer.tsx`: Video.js wrapper (client only)
-- `src/components/player/WatchClient.tsx`: wires player to saved progress, autoplay, next episode
-- `src/lib/catalog.ts`: mock catalog, test streams, intro/credits markers
-- `src/lib/store.ts`: Zustand (persisted to localStorage): watch progress, My List, autoplay setting
-- TanStack Query is installed and provided in `src/app/providers.tsx`, ready for when the catalog moves to an API
+A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds the static site and publishes it to GitHub Pages on every push to `main`. The base path in `next.config.ts` must match the repository name (`/streaming-platform`).
 
-## Implemented (MVP)
+## Notes
 
-Video.js core controls (play/pause, seek bar with buffered range, volume/mute, fullscreen, PiP, speed 0.5-2x, ±10s skip buttons, time display, auto-hide controls, big play button, buffering spinner) plus:
-
-- HLS adaptive streaming, quality menu (`videojs-contrib-quality-menu`)
-- Resume from last position; Continue Watching row
-- Skip Intro button (timestamp markers), Next Episode countdown with autoplay toggle
-- Keyboard shortcuts: Space/K, J/L ±10s, arrows (seek/volume), M, F, C, 0-9
-- Media Session API (media keys, lock screen)
-- Error recovery: retry with backoff (3 attempts)
-- Search (debounced, instant results), My List, title pages, responsive layout
-
-## Not built yet (suggested next)
-
-Thumbnail sprite previews, chapters, audio and subtitle panel, subtitle styling, "Are you still watching?", stats overlay, touch gestures (`videojs-mobile-ui`), profiles/Kids, live/multiview, ads (`videojs-contrib-ads`), Playwright tests, Sentry, backend (FFmpeg/HLS pipeline, signed URLs, auth, DB).
-
-## Content and legal notes
-
-Streams are public test streams (Mux, Bitmovin/Blender Sintel, Unified Streaming Tears of Steel, Apple bipbop). Verify each stream's availability and terms before relying on it. Artwork is generated from colors. There is no DRM; "Disable download" only deters casual copying.
+- Videos are public test streams (Big Buck Bunny, Elephants Dream, Tears of Steel from Blender, plus Mux and Apple samples). Third-party hosts can go offline.
+- Poster artwork is generated from colors, not real images.
+- There is no DRM, authentication or server. Parental controls and the PIN are demo-only and not enforced.
