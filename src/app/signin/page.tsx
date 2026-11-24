@@ -67,9 +67,9 @@ export default function SignInPage() {
         </form>
         <p className="text-sm text-muted">
           New to Kinora?{" "}
-          <a href="#" className="font-semibold text-fg underline">
+          <Link href="/plans" className="font-semibold text-fg underline">
             Create an account
-          </a>
+          </Link>
         </p>
         <p className="text-xs text-muted">Demo build: no account is needed and nothing is sent anywhere.</p>
       </main>

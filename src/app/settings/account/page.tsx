@@ -8,6 +8,7 @@ import { useHydrated } from "@/lib/useHydrated";
 export default function AccountSettings() {
   const ready = useHydrated();
   const email = useStore((s) => s.accountEmail);
+  const plan = useStore((s) => s.plan);
   const set = useStore((s) => s.set);
   const resetAll = useStore((s) => s.resetAll);
   const [draft, setDraft] = useState<string | null>(null);
@@ -59,10 +60,12 @@ export default function AccountSettings() {
         <Panel>
           <div className="flex flex-wrap items-center justify-between gap-4 p-5">
             <div>
-              <div className="font-semibold">Standard</div>
-              <div className="text-sm text-muted">Full HD, 2 screens at once. Sample plan, no billing.</div>
+              <div className="font-semibold">{ready ? ["Basic", "Standard", "Premium"][plan] : "Standard"}</div>
+              <div className="text-sm text-muted">Sample plan, no billing.</div>
             </div>
-            <span className="rounded-full border border-muted/60 px-3 py-1 text-xs font-semibold">Demo</span>
+            <Link href="/plans" className={btnGhost}>
+              Change plan
+            </Link>
           </div>
         </Panel>
       </Section>

@@ -9,8 +9,9 @@ const NAV = [
   { href: "/browse", label: "Home" },
   { href: "/series", label: "Series" },
   { href: "/films", label: "Films" },
-  { href: "/documentaries", label: "Documentaries" },
+  { href: "/new-hot", label: "New & Hot" },
   { href: "/my-list", label: "My list" },
+  { href: "/downloads", label: "Downloads" },
 ];
 
 const menuItem = "flex min-h-11 items-center gap-3 px-4 py-2.5 text-left text-[15px] hover:bg-line";

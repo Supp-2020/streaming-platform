@@ -1,84 +1,140 @@
 "use client";
 import { useState } from "react";
-import { btnGhost, btnPrimary, inputCls, Panel, RadioRows, Section } from "@/components/settings/ui";
-import { useStore, type MaxRating } from "@/lib/store";
+import { btnGhost, Panel, RadioRows, Section, Switch } from "@/components/settings/ui";
+import { TITLES, getTitle } from "@/lib/catalog";
+import { TIERS } from "@/lib/parental";
+import { PROFILES, profileInfo, useStore } from "@/lib/store";
 import { useHydrated } from "@/lib/useHydrated";
-
-const RATINGS: { value: MaxRating; label: string; help: string }[] = [
-  { value: "U", label: "U", help: "Suitable for all ages." },
-  { value: "12", label: "12 and under", help: "Up to 12 rated titles." },
-  { value: "16+", label: "16+", help: "Up to 16+ rated titles." },
-  { value: "18", label: "All titles", help: "Everything, including 18-rated." },
-];
 
 export default function ParentalSettings() {
   const ready = useHydrated();
-  const maxRating = useStore((s) => s.maxRating);
-  const pin = useStore((s) => s.pin);
-  const set = useStore((s) => s.set);
-  const [draft, setDraft] = useState("");
-  const [msg, setMsg] = useState("");
+  const names = useStore((s) => s.profileNames);
+  const active = useStore((s) => s.profile);
+  const all = useStore((s) => s.parental);
+  const setParental = useStore((s) => s.setParental);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
 
-  const valid = /^\d{4}$/.test(draft);
-  const hasPin = ready && pin.length === 4;
+  const idx = picked ?? (ready ? active : 0);
+  const prefs = all[idx] ?? { tier: 3, pinOn: false, pin: "", blocked: [] };
+  const shown = ready ? names : PROFILES.map((p) => p.name);
+  const blockable = TITLES.filter((t) => !prefs.blocked.includes(t.id));
+
+  const setDigit = (i: number, v: string) => {
+    const d = v.replace(/\D/g, "").slice(-1);
+    const chars = prefs.pin.padEnd(4, " ").split("");
+    chars[i] = d || " ";
+    setParental(idx, { pin: chars.join("") }); // empty digits are kept as spaces so positions stay aligned
+    if (d) (document.getElementById(`pin-${i + 1}`) as HTMLInputElement | null)?.focus();
+  };
 
   return (
     <>
       <Section
-        id="pc"
+        id="pf"
         title="Parental controls"
-        intro="Demo-grade only: these preferences are saved in this browser but are not enforced anywhere yet, and the PIN is stored unencrypted. Don't reuse a real PIN."
+        intro="Demo-grade: maturity level and blocked titles hide titles in lists and search (direct links still open). The PIN is saved unencrypted and isn't asked for yet."
       >
-        <RadioRows label="Maximum rating" value={ready ? maxRating : null} options={RATINGS} onChange={(v) => set({ maxRating: v })} />
+        <div className="flex items-center gap-3">
+          <label htmlFor="prof" className="text-sm text-muted">
+            Profile
+          </label>
+          <select id="prof" value={idx} onChange={(e) => setPicked(Number(e.target.value))} className="h-11 rounded-lg border border-[#8a8378] bg-surface px-3.5 text-[15px]">
+            {PROFILES.map((_, i) => (
+              <option key={i} value={i}>
+                {profileInfo(i, shown).name}
+              </option>
+            ))}
+          </select>
+        </div>
       </Section>
 
-      <Section id="pin" title="Profile PIN" intro="A 4-digit PIN you could require before switching to an adult profile.">
+      <Section id="mt" title="Maturity level" intro="Only titles at or below this level appear for this profile.">
+        <RadioRows
+          label="Maturity level"
+          value={ready ? String(prefs.tier) : null}
+          options={TIERS.map((t, i) => ({ value: String(i), label: t.label, help: t.help }))}
+          onChange={(v) => setParental(idx, { tier: Number(v) })}
+        />
+      </Section>
+
+      <Section id="pn" title="Profile PIN">
         <Panel>
-          <form
-            className="flex flex-col gap-3 p-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!valid) return;
-              set({ pin: draft });
-              setDraft("");
-              setMsg("PIN saved.");
-            }}
-          >
-            <label htmlFor="pin-in" className="text-sm font-medium">
-              {hasPin ? "Change PIN" : "Set a PIN"}
-            </label>
-            <input
-              id="pin-in"
-              inputMode="numeric"
-              autoComplete="off"
-              maxLength={4}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value.replace(/\D/g, ""))}
-              placeholder="4 digits"
-              className={`${inputCls} max-w-[200px] tracking-[0.4em]`}
-            />
-            <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" disabled={!valid} className={btnPrimary}>
-                {hasPin ? "Update PIN" : "Save PIN"}
-              </button>
-              {hasPin && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    set({ pin: "" });
-                    setMsg("PIN removed.");
-                  }}
-                  className={btnGhost}
-                >
-                  Remove PIN
-                </button>
-              )}
-              <span role="status" className="text-sm text-muted">
-                {msg || (hasPin ? "A PIN is set." : "No PIN set.")}
+          <div className="flex items-center justify-between gap-6 px-5 py-[18px]">
+            <div className="flex flex-col gap-1">
+              <span id="pn-label" className="text-base font-semibold">
+                Profile PIN
               </span>
+              <span className="text-sm leading-normal text-muted">Ask for a 4 digit PIN before leaving this profile or playing adult titles.</span>
             </div>
-          </form>
+            <Switch id="pn-label" checked={ready && prefs.pinOn} onChange={(v) => setParental(idx, { pinOn: v })} />
+          </div>
+          {ready && prefs.pinOn && (
+            <fieldset className="flex flex-col gap-2.5 px-5 py-5">
+              <legend className="mb-2 text-sm font-medium">Enter a new PIN</legend>
+              <div className="flex gap-2.5">
+                {[0, 1, 2, 3].map((i) => (
+                  <input
+                    key={i}
+                    id={`pin-${i}`}
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={1}
+                    autoComplete="off"
+                    aria-label={`PIN digit ${i + 1}`}
+                    value={(prefs.pin[i] ?? "").trim()}
+                    onChange={(e) => setDigit(i, e.target.value)}
+                    className="h-14 w-14 rounded-lg border border-[#8a8378] bg-bg text-center text-[22px]"
+                  />
+                ))}
+              </div>
+              <span className="text-[13px] text-muted">Avoid easy PINs like 1234. Don&apos;t reuse a real PIN: this demo stores it in plain text in your browser.</span>
+            </fieldset>
+          )}
         </Panel>
+      </Section>
+
+      <Section id="bt" title="Blocked titles">
+        <div className="flex flex-wrap gap-2">
+          {prefs.blocked.map((id) => (
+            <span key={id} className="inline-flex h-11 items-center gap-1 rounded-full border border-[#8a8378] pl-4 pr-1.5 text-sm font-medium">
+              {getTitle(id)?.name ?? id}
+              <button onClick={() => setParental(idx, { blocked: prefs.blocked.filter((x) => x !== id) })} aria-label={`Unblock ${getTitle(id)?.name ?? id}`} className="flex h-8 w-8 items-center justify-center rounded-full">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </span>
+          ))}
+          <button onClick={() => setAdding(!adding)} aria-expanded={adding} className="h-11 rounded-full border border-dashed border-[#8a8378] px-[18px] text-sm font-medium">
+            + Block a title
+          </button>
+        </div>
+        {adding && (
+          <Panel>
+            {blockable.length === 0 && <p className="p-5 text-sm text-muted">Every title is already blocked.</p>}
+            {blockable.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => {
+                  setParental(idx, { blocked: [...prefs.blocked, t.id] });
+                  setAdding(false);
+                }}
+                className="flex min-h-11 items-center justify-between px-5 py-3 text-left hover:bg-line"
+              >
+                <span className="font-semibold">{t.name}</span>
+                <span className="text-sm capitalize text-muted">
+                  {t.kind} · {t.rating}
+                </span>
+              </button>
+            ))}
+            <div className="p-3">
+              <button onClick={() => setAdding(false)} className={btnGhost}>
+                Cancel
+              </button>
+            </div>
+          </Panel>
+        )}
       </Section>
     </>
   );

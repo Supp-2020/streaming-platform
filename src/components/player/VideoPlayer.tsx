@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import videojs from "video.js";
 import "videojs-contrib-quality-menu";
 import type { Marker } from "@/lib/catalog";
+import TracksDialog from "./TracksDialog";
 
 type VjsPlayer = ReturnType<typeof videojs>;
 
@@ -46,12 +47,14 @@ const NEXT_COUNTDOWN = 8;
 export default function VideoPlayer(props: VideoPlayerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<VjsPlayer | null>(null);
-  const [playerEl, setPlayerEl] = useState<Element | null>(null);
+  // Elements we render into (inside the player, so they survive fullscreen).
+  const [ui, setUi] = useState<{ player: VjsPlayer; el: Element; bar: Element | null } | null>(null);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ended, setEnded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [tracksOpen, setTracksOpen] = useState(false);
   const retries = useRef(0);
   const lastSave = useRef(0);
 
@@ -82,8 +85,13 @@ export default function VideoPlayer(props: VideoPlayerProps) {
         pictureInPictureToggle: true,
         remainingTimeDisplay: true,
         currentTimeDisplay: true,
-        timeDivider: true,
+        timeDivider: false,
         durationDisplay: false,
+        // Replaced by our "Audio & subtitles" dialog.
+        subsCapsButton: false,
+        audioTrackButton: false,
+        chaptersButton: false,
+        descriptionsButton: false,
       },
       userActions: { hotkeys },
       html5: { vhs: { overrideNative: true } },
@@ -133,7 +141,7 @@ export default function VideoPlayer(props: VideoPlayerProps) {
         setError("Playback failed. Check your connection and try again.");
       }
     });
-    player.ready(() => setPlayerEl(player.el()));
+    player.ready(() => setUi({ player, el: player.el(), bar: player.getChild("controlBar")?.el() ?? null }));
 
     // Media Session API: hardware keys + lock screen.
     if ("mediaSession" in navigator) {
@@ -149,7 +157,7 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     return () => {
       const d = player.duration() ?? 0;
       if (d > 0) latest.current.onProgress(player.currentTime() ?? 0, d);
-      setPlayerEl(null);
+      setUi(null);
       playerRef.current = null;
       player.dispose();
     };
@@ -172,10 +180,10 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     }
   }, [props.src, props.poster, props.title, props.subtitle]);
 
-  // ---- apply saved settings: caption size and quality cap ----
+  // ---- apply saved settings: caption style and quality cap ----
   const { captions, quality } = props;
   useEffect(() => {
-    const p = playerRef.current as unknown as WithPlugins | null;
+    const p = ui?.player as unknown as WithPlugins | undefined;
     if (!p?.textTrackSettings) return;
     try {
       p.textTrackSettings.setValues({
@@ -188,12 +196,12 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     } catch {
       /* optional */
     }
-  }, [captions.size, captions.color, captions.bg, playerEl]);
+  }, [captions.size, captions.color, captions.bg, ui]);
 
   // Turn on a matching subtitle track by default when the stream offers one.
   useEffect(() => {
-    const player = playerRef.current;
-    if (!player || !playerEl || !captions.defaultOn) return;
+    const player = ui?.player;
+    if (!player || !captions.defaultOn) return;
     const list = player.textTracks();
     const pick = () => {
       let chosen = false;
@@ -208,10 +216,10 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     pick();
     list.addEventListener("addtrack", pick);
     return () => list.removeEventListener("addtrack", pick);
-  }, [captions.defaultOn, captions.lang, playerEl]);
+  }, [captions.defaultOn, captions.lang, ui]);
 
   useEffect(() => {
-    const ql = (playerRef.current as unknown as WithPlugins | null)?.qualityLevels?.();
+    const ql = (ui?.player as unknown as WithPlugins | undefined)?.qualityLevels?.();
     if (!ql) return;
     const cap = MAX_HEIGHT[quality];
     const apply = () => {
@@ -223,9 +231,11 @@ export default function VideoPlayer(props: VideoPlayerProps) {
     apply();
     ql.on("addqualitylevel", apply);
     return () => ql.off("addqualitylevel", apply);
-  }, [quality, playerEl]);
+  }, [quality, ui]);
 
-  // ---- overlays (rendered inside the player element so they survive fullscreen) ----
+  const closeTracks = useCallback(() => setTracksOpen(false), []);
+
+  // ---- overlays ----
   const m = props.markers;
   const creditsAt = m?.creditsStart ?? (duration > 0 ? duration - 20 : Infinity);
   const nearEnd = props.hasNext && !dismissed && (ended || time >= creditsAt);
@@ -236,41 +246,43 @@ export default function VideoPlayer(props: VideoPlayerProps) {
       {showSkipIntro && (
         <button
           onClick={() => playerRef.current?.currentTime(m!.introEnd!)}
-          className="absolute bottom-24 left-6 z-20 rounded-lg border border-fg/60 bg-bg/80 px-5 py-3 text-sm font-semibold text-fg backdrop-blur hover:bg-fg hover:text-bg"
+          className="absolute bottom-28 left-4 z-20 min-h-12 rounded-lg border border-fg/60 bg-bg/80 px-5 py-3 text-base font-semibold text-fg backdrop-blur hover:bg-fg hover:text-bg md:bottom-32 md:left-6"
         >
           Skip intro
         </button>
       )}
       {nearEnd && (
-        <UpNext
-          autoplay={props.autoplayNext}
-          onAutoplayChange={props.onAutoplayNextChange}
-          onPlay={props.onNext}
-          onDismiss={() => setDismissed(true)}
-        />
+        <UpNext autoplay={props.autoplayNext} onAutoplayChange={props.onAutoplayNextChange} onPlay={props.onNext} onDismiss={() => setDismissed(true)} />
       )}
       {error && (
         <div role="alert" className="absolute left-1/2 top-6 z-20 -translate-x-1/2 rounded-lg bg-bg/90 px-4 py-2 text-sm text-fg">
           {error}
         </div>
       )}
+      {tracksOpen && ui && <TracksDialog player={ui.player} onClose={closeTracks} />}
     </>
+  );
+
+  // Our "Audio & subtitles" button lives in the Video.js control bar (CSS orders it before fullscreen).
+  const tracksButton = (
+    <button onClick={() => setTracksOpen(true)} aria-haspopup="dialog" aria-label="Audio and subtitles" title="Audio & subtitles" className="kinora-tracks vjs-control vjs-button">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M7 12h3M7 15h6M14 12h3" />
+      </svg>
+    </button>
   );
 
   return (
     <div className="relative h-full w-full bg-black">
       <div data-vjs-player ref={hostRef} className="h-full w-full" />
-      {playerEl && createPortal(overlay, playerEl)}
+      {ui && createPortal(overlay, ui.el)}
+      {ui?.bar && createPortal(tracksButton, ui.bar)}
     </div>
   );
 }
 
-function UpNext(props: {
-  autoplay: boolean;
-  onAutoplayChange: (v: boolean) => void;
-  onPlay: () => void;
-  onDismiss: () => void;
-}) {
+function UpNext(props: { autoplay: boolean; onAutoplayChange: (v: boolean) => void; onPlay: () => void; onDismiss: () => void }) {
   const { autoplay, onPlay } = props;
   const [left, setLeft] = useState(NEXT_COUNTDOWN);
   useEffect(() => {
@@ -282,18 +294,18 @@ function UpNext(props: {
   }, [left, autoplay, onPlay]);
 
   return (
-    <div className="absolute bottom-24 right-6 z-20 flex w-72 flex-col gap-3 rounded-xl border border-[#3a3631] bg-surface p-4 text-fg shadow-xl">
-      <span className="text-xs text-muted">Up next{autoplay ? ` in ${Math.max(0, left)}s` : ""}</span>
+    <div className="absolute bottom-28 right-4 z-20 flex w-[min(20rem,calc(100%-2rem))] flex-col gap-3 rounded-xl border border-[#3a3631] bg-surface p-4 text-fg shadow-xl md:bottom-32 md:right-6">
+      <span className="text-sm text-muted">Up next{autoplay ? ` in ${Math.max(0, left)}s` : ""}</span>
       <div className="flex gap-2">
-        <button onClick={props.onPlay} className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-[#1a1208]">
+        <button onClick={props.onPlay} className="min-h-12 flex-1 rounded-lg bg-accent px-4 py-2.5 text-base font-semibold text-[#1a1208]">
           Play next
         </button>
-        <button onClick={props.onDismiss} className="rounded-lg border border-muted/60 px-3 py-2.5 text-sm">
+        <button onClick={props.onDismiss} className="min-h-12 rounded-lg border border-muted/60 px-4 py-2.5 text-base">
           Stay
         </button>
       </div>
-      <label className="flex items-center gap-2 text-xs text-muted">
-        <input type="checkbox" checked={autoplay} onChange={(e) => props.onAutoplayChange(e.target.checked)} />
+      <label className="flex min-h-11 items-center gap-3 text-sm text-muted">
+        <input type="checkbox" className="h-5 w-5 accent-accent" checked={autoplay} onChange={(e) => props.onAutoplayChange(e.target.checked)} />
         Autoplay next episode
       </label>
     </div>
@@ -302,6 +314,9 @@ function UpNext(props: {
 
 /** Keyboard shortcuts: Space/K, J/L ±10s, ←/→ ±5s, ↑/↓ volume, M mute, F fullscreen, C captions, 0-9 jump. */
 function hotkeys(this: VjsPlayer, e: KeyboardEvent) {
+  // Don't hijack typing or the dialogs we render inside the player.
+  if ((e.target as HTMLElement | null)?.closest?.("input,select,textarea,[role=dialog]")) return;
+
   // eslint-disable-next-line @typescript-eslint/no-this-alias -- Video.js calls this handler with the player as `this`
   const player = this;
   const key = e.key.toLowerCase();

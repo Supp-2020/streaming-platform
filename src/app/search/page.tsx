@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Pill, PosterGrid } from "@/components/Card";
 import { TITLES } from "@/lib/catalog";
+import { useAllowed } from "@/lib/parental";
+import { useStore } from "@/lib/store";
 
 const FILTERS = [
   { label: "All", kind: null },
@@ -15,6 +17,9 @@ const SORTS = ["Most relevant", "Newest", "A to Z"] as const;
 const SUGGESTIONS = ["Sci-Fi", "Animation", "Thriller", "Family", "Technology"];
 
 export default function SearchPage() {
+  const allowed = useAllowed();
+  const profile = useStore((s) => s.profile);
+  const parental = useStore((s) => s.parental);
   const [q, setQ] = useState("");
   const [debounced, setDebounced] = useState("");
   const [filter, setFilter] = useState(0);
@@ -29,6 +34,7 @@ export default function SearchPage() {
     const kind = FILTERS[filter].kind;
     const list = TITLES.filter(
       (t) =>
+        allowed(t.id) &&
         (!kind || t.kind === kind) &&
         (!debounced ||
           t.name.toLowerCase().includes(debounced) ||
@@ -38,7 +44,8 @@ export default function SearchPage() {
     if (sort === "Newest") list.sort((a, b) => b.year - a.year);
     if (sort === "A to Z") list.sort((a, b) => a.name.localeCompare(b.name));
     return list.map((t) => t.id);
-  }, [debounced, filter, sort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `allowed` is rebuilt every render; its inputs are the store values below
+  }, [debounced, filter, sort, profile, parental]);
 
   return (
     <div className="min-h-screen">

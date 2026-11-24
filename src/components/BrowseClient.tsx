@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Art } from "@/components/Art";
 import { Card } from "@/components/Card";
 import ListButton from "@/components/ListButton";
-import { getEpisode, getTitle, ROWS, fmtTime } from "@/lib/catalog";
+import { getEpisode, getTitle, ROWS, TITLES, fmtTime } from "@/lib/catalog";
+import { useAllowed } from "@/lib/parental";
 import { useStore } from "@/lib/store";
 import { useHydrated } from "@/lib/useHydrated";
 
@@ -11,8 +12,16 @@ export default function BrowseClient() {
   const hydrated = useHydrated();
   const progress = useStore((s) => s.progress);
 
+  const allowed = useAllowed();
+  const tastes = useStore((s) => s.tastes);
+
   const featured = getTitle("tears-of-steel")!;
   const featuredEp = featured.episodes[0];
+
+  // "Picked for you": titles whose genre or kind matches the genres chosen on the taste page.
+  const wanted = hydrated ? tastes.map((t) => t.toLowerCase()) : [];
+  const picked = TITLES.filter((t) => allowed(t.id) && wanted.some((w) => t.genres.some((g) => g.toLowerCase() === w) || (w === "documentary" && t.kind === "documentary"))).map((t) => t.id);
+  const rows = [...(picked.length ? [{ id: "picked", title: "Picked for you", ids: picked }] : []), ...ROWS].map((r) => ({ ...r, ids: r.ids.filter(allowed) })).filter((r) => r.ids.length > 0);
 
   const continueItems = hydrated
     ? Object.entries(progress)
@@ -70,7 +79,7 @@ export default function BrowseClient() {
           </section>
         )}
 
-        {ROWS.map((row) => (
+        {rows.map((row) => (
           <section key={row.id} aria-labelledby={row.id}>
             <h2 id={row.id} className="mb-4 font-display text-2xl font-bold">
               {row.title}

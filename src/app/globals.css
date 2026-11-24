@@ -1,6 +1,9 @@
+/* Video.js CSS is unlayered by default and would beat Tailwind utilities inside the player.
+   Put it in its own layer between base and utilities; our .kinora-player rules below stay unlayered. */
+@layer theme, base, vjs, components, utilities;
 @import "tailwindcss";
-@import "video.js/dist/video-js.css";
-@import "videojs-contrib-quality-menu/dist/videojs-contrib-quality-menu.css";
+@import "video.js/dist/video-js.css" layer(vjs);
+@import "videojs-contrib-quality-menu/dist/videojs-contrib-quality-menu.css" layer(vjs);
 
 @theme inline {
   --color-bg: #131211;
@@ -24,22 +27,61 @@ body {
   outline-offset: 3px;
 }
 
-/* ---- Video.js theme: Kinora ---- */
+/* ---- Video.js theme: Kinora (large, touch-friendly controls) ----
+   Everything in Video.js is sized in em, so the base font-size scales every control. */
 .kinora-player.video-js {
   --vjs-accent: #f0a04b;
+  --touch: 54px; /* tap target (px, not em: em would resolve against each icon's own font size) */
   width: 100%;
   height: 100%;
   background: #0b0a09;
   font-family: var(--font-sans);
+  font-size: 16px;
 }
+@media (max-width: 640px) {
+  .kinora-player.video-js {
+    font-size: 14px;
+  }
+}
+
+/* Two rows: seek bar on top, buttons below. */
 .kinora-player .vjs-control-bar {
-  background: linear-gradient(transparent, rgba(11, 10, 9, 0.9));
-  height: 4.5em;
-  padding-top: 1.2em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  height: auto;
+  padding: 0.6em 0.8em 0.5em;
+  background: linear-gradient(transparent, rgba(11, 10, 9, 0.92) 40%);
+}
+.kinora-player .vjs-progress-control {
+  order: -1;
+  flex: 0 0 100%;
+  width: 100%;
+  position: relative;
+  height: 2.4em;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+}
+.kinora-player .vjs-progress-control .vjs-progress-holder {
+  height: 0.5em;
+  margin: 0;
+  border-radius: 0.25em;
+  font-size: 1em;
+}
+.kinora-player .vjs-progress-control:hover .vjs-progress-holder {
+  height: 0.7em;
 }
 .kinora-player .vjs-play-progress,
 .kinora-player .vjs-volume-level {
   background: var(--vjs-accent);
+  border-radius: 0.25em;
+}
+.kinora-player .vjs-play-progress:before {
+  /* scrubber knob */
+  font-size: 1.6em;
+  top: -0.32em;
+  color: var(--vjs-accent);
 }
 .kinora-player .vjs-slider {
   background: rgba(243, 239, 232, 0.28);
@@ -47,29 +89,144 @@ body {
 .kinora-player .vjs-load-progress div {
   background: rgba(243, 239, 232, 0.45);
 }
+
+/* Big tap targets and icons */
+.kinora-player .vjs-control-bar > .vjs-control:not(.vjs-time-control):not(.vjs-progress-control):not(.vjs-custom-control-spacer):not(.vjs-volume-panel) {
+  flex: 0 0 auto;
+  width: var(--touch);
+  height: var(--touch);
+}
+.kinora-player .vjs-control-bar .vjs-volume-panel {
+  height: var(--touch);
+  flex: 0 0 auto;
+}
+.kinora-player .vjs-control-bar .vjs-volume-panel .vjs-mute-control {
+  width: var(--touch);
+  height: var(--touch);
+}
+/* Never show the live-only control on on-demand video. */
+.kinora-player:not(.vjs-live) .vjs-seek-to-live-control,
+.kinora-player:not(.vjs-liveui) .vjs-seek-to-live-control {
+  display: none;
+}
+.kinora-player .vjs-control-bar .vjs-button > .vjs-icon-placeholder:before,
+.kinora-player .vjs-control-bar .vjs-icon-placeholder:before {
+  font-size: 2em;
+  line-height: var(--touch);
+  height: var(--touch);
+  width: 100%;
+}
+.kinora-player .vjs-skip-forward-10,
+.kinora-player .vjs-skip-backward-10 {
+  width: var(--touch);
+}
+.kinora-player .vjs-play-control {
+  width: calc(var(--touch) * 1.15);
+}
+.kinora-player .vjs-control-bar .kinora-tracks {
+  order: 8;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.kinora-player .vjs-fullscreen-control {
+  order: 9;
+}
+.kinora-player .vjs-custom-control-spacer {
+  display: block;
+  flex: 1 1 auto;
+}
+.kinora-player .vjs-current-time,
+.kinora-player .vjs-remaining-time {
+  display: flex;
+  align-items: center;
+  width: auto;
+  min-width: 0;
+  padding: 0 0.4em;
+  font-size: 1.05em;
+  font-variant-numeric: tabular-nums;
+}
+.kinora-player .vjs-time-control {
+  flex: 0 0 auto;
+  height: var(--touch);
+  line-height: var(--touch);
+}
+.kinora-player .vjs-playback-rate .vjs-playback-rate-value {
+  font-size: 1.2em;
+  line-height: var(--touch);
+}
+
+/* Phones: keep the bar uncluttered. Volume stays on the device buttons. */
+@media (max-width: 640px) {
+  .kinora-player.video-js {
+    --touch: 44px;
+  }
+  .kinora-player .vjs-control-bar {
+    padding: 0.4em 0.5em 0.3em;
+  }
+  .kinora-player .vjs-current-time,
+  .kinora-player .vjs-volume-panel,
+  .kinora-player .vjs-picture-in-picture-control,
+  .kinora-player .vjs-playback-rate {
+    display: none;
+  }
+  .kinora-player .vjs-remaining-time {
+    margin-left: auto;
+  }
+}
+
+/* Big center play button */
 .kinora-player .vjs-big-play-button {
   background: var(--vjs-accent);
   color: #1a1208;
   border: 0;
   border-radius: 50%;
-  width: 2.4em;
-  height: 2.4em;
-  line-height: 2.4em;
-  margin-left: -1.2em;
-  margin-top: -1.2em;
+  width: 2.6em;
+  height: 2.6em;
+  line-height: 2.6em;
+  margin-left: -1.3em;
+  margin-top: -1.3em;
+  font-size: 3.4em;
 }
 .kinora-player:hover .vjs-big-play-button,
 .kinora-player .vjs-big-play-button:focus {
   background: #f6b66f;
 }
+.kinora-player .vjs-big-play-button .vjs-icon-placeholder:before {
+  font-size: 1em;
+  line-height: 2.6em;
+}
+
+/* Menus (speed, quality) */
+.kinora-player .vjs-menu-button-popup .vjs-menu {
+  bottom: var(--touch);
+  width: 12em;
+  margin-left: -6em;
+}
 .kinora-player .vjs-menu-button-popup .vjs-menu .vjs-menu-content {
   background: #1d1b19;
   border: 1px solid #3a3631;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-size: 1.1em;
+  max-height: 22em;
+}
+.kinora-player .vjs-menu li {
+  min-height: 2.8em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1em;
+  text-transform: none;
 }
 .kinora-player .vjs-menu li.vjs-selected {
   background: var(--vjs-accent);
   color: #1a1208;
+}
+
+/* Keep Video.js text tracks readable above the taller bar */
+.kinora-player .vjs-text-track-display {
+  bottom: 6em;
 }
 
 @media (prefers-reduced-motion: reduce) {

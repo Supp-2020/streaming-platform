@@ -1,9 +1,12 @@
+"use client";
 import { PosterGrid } from "@/components/Card";
 import Header from "@/components/Header";
 import { TITLES, type Title } from "@/lib/catalog";
+import { useAllowed } from "@/lib/parental";
 
 export default function CategoryPage({ kind, heading }: { kind: Title["kind"]; heading: string }) {
-  const ids = TITLES.filter((t) => t.kind === kind).map((t) => t.id);
+  const allowed = useAllowed();
+  const ids = TITLES.filter((t) => t.kind === kind && allowed(t.id)).map((t) => t.id);
   return (
     <>
       <Header />
