@@ -47,5 +47,4 @@ A GitHub Actions workflow (`.github/workflows/deploy.yml`) builds the static sit
 ## Notes
 
 - Videos are public test streams (Big Buck Bunny, Elephants Dream, Tears of Steel from Blender, plus Mux and Apple samples). Third-party hosts can go offline.
-- Poster artwork is generated from colors, not real images.
 - There is no DRM, authentication or server. Parental controls and the PIN are demo-only and not enforced.

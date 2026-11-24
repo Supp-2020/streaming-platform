@@ -26,6 +26,9 @@ export type Title = {
   cast: string[];
   bg: string;
   fg: string;
+  /** Optional picture under /public. Titles without one use the generated shape artwork. */
+  image?: string;
+  imagePos?: string; // CSS object-position when cropping
   badges: string[];
   episodes: Episode[];
 };
@@ -77,6 +80,8 @@ export const TITLES: Title[] = [
     cast: ["Blender Foundation"],
     bg: "#2C4A43",
     fg: "#F0A04B",
+    image: "/thumbs/big-buck-bunny.jpg", // poster, CC BY 3.0 Blender Foundation
+    imagePos: "50% 30%",
     badges: ["HD"],
     episodes: episodes("big-buck-bunny", [[1, "Big Buck Bunny", "The full short film.", STREAMS.bbb]], { introStart: 2, introEnd: 12 }),
   },
@@ -91,6 +96,8 @@ export const TITLES: Title[] = [
     cast: ["Blender Foundation"],
     bg: "#4A2F2F",
     fg: "#E9B44C",
+    image: "/thumbs/elephants-dream.jpg", // film still, CC BY 2.5 Blender Foundation | Orange
+    imagePos: "62% 40%",
     badges: ["HD"],
     episodes: episodes("elephants-dream", [[1, "Elephants Dream", "The full short film.", STREAMS.elephants]], { introStart: 3, introEnd: 14 }),
   },
@@ -135,6 +142,7 @@ export const TITLES: Title[] = [
     cast: ["Placeholder Cast"],
     bg: "#3B2F4A",
     fg: "#F0A04B",
+    image: "/thumbs/test-pattern.jpg", // placeholder photo (Unsplash via Lorem Picsum)
     badges: ["4K", "HDR"],
     episodes: episodes("test-pattern", [
       [1, "Pilot", "A strange transmission interrupts the night shift.", STREAMS.bbb],
@@ -155,6 +163,8 @@ export const TITLES: Title[] = [
     cast: ["Placeholder Cast"],
     bg: "#2B3A55",
     fg: "#F0A04B",
+    image: "/thumbs/neon-harbor.jpg", // placeholder photo (Unsplash via Lorem Picsum)
+    imagePos: "40% 50%",
     badges: ["HD", "Dolby"],
     episodes: episodes("neon-harbor", [
       [1, "Low Tide", "A body surfaces at Pier 9.", STREAMS.tears],
@@ -174,6 +184,7 @@ export const TITLES: Title[] = [
     cast: ["Placeholder Cast"],
     bg: "#2C4A43",
     fg: "#D9D2C3",
+    image: "/thumbs/the-long-night.jpg", // placeholder photo (Unsplash via Lorem Picsum)
     badges: ["HD"],
     episodes: episodes("the-long-night", [
       [1, "Midnight", "The clocks stop at 12:00.", STREAMS.elephants],
@@ -225,6 +236,7 @@ export const TITLES: Title[] = [
     cast: ["Apple", "Mux"],
     bg: "#3B2F4A",
     fg: "#E9B44C",
+    image: "/thumbs/test-card-chronicles.jpg", // placeholder photo (Unsplash via Lorem Picsum)
     badges: ["HD"],
     episodes: episodes("test-card-chronicles", [
       [1, "Widescreen", "16:9 adaptive renditions.", STREAMS.apple169],
